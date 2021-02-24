@@ -82,18 +82,15 @@ CREATE TABLE `comandas` (
   `fecha` date NOT NULL,
   `hora` time NOT NULL,
   `tipo` enum('RD','RT') NOT NULL,
-  `producto_id` int NOT NULL,
   `tienda_id` int NOT NULL,
   `empleado_id` int DEFAULT NULL,
   `cliente_id` int NOT NULL,
   PRIMARY KEY (`comanda_id`),
-  KEY `fk_comandas_productos1_idx` (`producto_id`),
   KEY `fk_comandas_tiendas1_idx` (`tienda_id`),
   KEY `fk_comandas_empleados1_idx` (`empleado_id`),
   KEY `fk_comandas_clientes1_idx` (`cliente_id`),
   CONSTRAINT `fk_comandas_clientes1` FOREIGN KEY (`cliente_id`) REFERENCES `clientes` (`cliente_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_comandas_empleados1` FOREIGN KEY (`empleado_id`) REFERENCES `empleados` (`empleado_id`) ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT `fk_comandas_productos1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`producto_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_comandas_tiendas1` FOREIGN KEY (`tienda_id`) REFERENCES `tiendas` (`tienda_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -104,8 +101,36 @@ CREATE TABLE `comandas` (
 
 LOCK TABLES `comandas` WRITE;
 /*!40000 ALTER TABLE `comandas` DISABLE KEYS */;
-INSERT INTO `comandas` VALUES (1,'2020-01-11','16:54:00','RT',4,3,NULL,3),(2,'2020-12-22','21:35:00','RD',1,2,2,2),(3,'2020-12-22','21:35:00','RD',2,2,2,2),(4,'2020-12-22','21:35:00','RD',3,2,2,2),(5,'2020-11-13','20:55:00','RT',1,1,NULL,1);
+INSERT INTO `comandas` VALUES (2,'2020-12-22','21:35:00','RD',2,2,2),(3,'2020-12-22','21:35:00','RD',2,2,2),(4,'2020-12-22','21:35:00','RD',2,2,2),(5,'2020-11-13','20:55:00','RT',1,NULL,1);
 /*!40000 ALTER TABLE `comandas` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `comandas_has_productos`
+--
+
+DROP TABLE IF EXISTS `comandas_has_productos`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `comandas_has_productos` (
+  `comanda_id` int NOT NULL,
+  `producto_id` int NOT NULL,
+  PRIMARY KEY (`comanda_id`,`producto_id`),
+  KEY `fk_comandas_has_productos_productos1_idx` (`producto_id`),
+  KEY `fk_comandas_has_productos_comandas1_idx` (`comanda_id`),
+  CONSTRAINT `fk_comandas_has_productos_comandas1` FOREIGN KEY (`comanda_id`) REFERENCES `comandas` (`comanda_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_comandas_has_productos_productos1` FOREIGN KEY (`producto_id`) REFERENCES `productos` (`producto_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `comandas_has_productos`
+--
+
+LOCK TABLES `comandas_has_productos` WRITE;
+/*!40000 ALTER TABLE `comandas_has_productos` DISABLE KEYS */;
+INSERT INTO `comandas_has_productos` VALUES (5,1),(2,2),(3,2),(4,2);
+/*!40000 ALTER TABLE `comandas_has_productos` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -122,8 +147,11 @@ CREATE TABLE `empleados` (
   `nif` varchar(9) NOT NULL,
   `telefono` varchar(10) DEFAULT NULL,
   `tipo-empleado` varchar(1) DEFAULT NULL COMMENT 'R: Repartidor\nC: Cocinero',
+  `tienda_id` int NOT NULL,
   PRIMARY KEY (`empleado_id`),
-  UNIQUE KEY `nif_UNIQUE` (`nif`)
+  UNIQUE KEY `nif_UNIQUE` (`nif`),
+  KEY `fk_empleados_tiendas1_idx` (`tienda_id`),
+  CONSTRAINT `fk_empleados_tiendas1` FOREIGN KEY (`tienda_id`) REFERENCES `tiendas` (`tienda_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -133,7 +161,7 @@ CREATE TABLE `empleados` (
 
 LOCK TABLES `empleados` WRITE;
 /*!40000 ALTER TABLE `empleados` DISABLE KEYS */;
-INSERT INTO `empleados` VALUES (1,'Sergi','Ortiz Termes','45678676H','665777888','C'),(2,'Silvia','Gil Ledesma','38999666G','656000111','R'),(3,'Jordi','Salvat Papaseit','38222444R','655444111','R'),(4,'Anna','Garcia Bardí','44555777Y','656098765','C');
+INSERT INTO `empleados` VALUES (1,'Sergi','Ortiz Termes','45678676H','665777888','C',1),(2,'Silvia','Gil Ledesma','38999666G','656000111','R',2),(3,'Jordi','Salvat Papaseit','38222444R','655444111','R',3),(4,'Anna','Garcia Bardí','44555777Y','656098765','C',3);
 /*!40000 ALTER TABLE `empleados` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -236,12 +264,8 @@ CREATE TABLE `tiendas` (
   `direccion` varchar(45) NOT NULL,
   `codigo-postal` varchar(5) NOT NULL,
   `localidad_id` int NOT NULL,
-  `empleado_id` int NOT NULL,
-  PRIMARY KEY (`tienda_id`,`empleado_id`),
-  UNIQUE KEY `empleado_id_UNIQUE` (`empleado_id`),
+  PRIMARY KEY (`tienda_id`),
   KEY `fk_tiendas_localidades1_idx` (`localidad_id`),
-  KEY `fk_tiendas_empleados1_idx` (`empleado_id`),
-  CONSTRAINT `fk_tiendas_empleados1` FOREIGN KEY (`empleado_id`) REFERENCES `empleados` (`empleado_id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `fk_tiendas_localidades1` FOREIGN KEY (`localidad_id`) REFERENCES `localidades` (`localidad_id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -252,7 +276,7 @@ CREATE TABLE `tiendas` (
 
 LOCK TABLES `tiendas` WRITE;
 /*!40000 ALTER TABLE `tiendas` DISABLE KEYS */;
-INSERT INTO `tiendas` VALUES (1,'C/Cartagena, 27. Bajos','08021',1,1),(2,'Plaça Major, s/n','12345',1,2),(3,'Av.De la comida, 1','28673',4,3),(3,'Av.De la comida, 1','28673',4,4);
+INSERT INTO `tiendas` VALUES (1,'C/Cartagena, 27. Bajos','08021',1),(2,'Plaça Major, s/n','12345',1),(3,'Av.De la comida, 1','28673',4);
 /*!40000 ALTER TABLE `tiendas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -289,4 +313,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-02-12 19:07:20
+-- Dump completed on 2021-02-24 15:55:47

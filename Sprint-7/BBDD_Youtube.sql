@@ -54,8 +54,6 @@ DROP TABLE IF EXISTS `comentarios`;
 CREATE TABLE `comentarios` (
   `comentario_id` int NOT NULL AUTO_INCREMENT,
   `texto` varchar(1000) NOT NULL,
-  `like` tinyint DEFAULT NULL,
-  `dislike` tinyint DEFAULT NULL,
   `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `video_id` int NOT NULL,
   `usuario_id` int NOT NULL,
@@ -73,7 +71,7 @@ CREATE TABLE `comentarios` (
 
 LOCK TABLES `comentarios` WRITE;
 /*!40000 ALTER TABLE `comentarios` DISABLE KEYS */;
-INSERT INTO `comentarios` VALUES (1,'Que gran película, pero muy triste',1,NULL,'2020-03-22 09:54:21',1,1),(2,'Que triste, no me ha gustado. Con Chaplin me esperaba reir mucho',NULL,1,'2019-06-11 22:45:21',1,2),(3,'Que lenta la película, por favor. He visto westerns mucho mejores',NULL,1,'2021-02-14 11:30:02',3,3),(4,'Que pedazo de canción, y como engancha. Cada día la escucho',1,NULL,'2021-02-14 11:30:02',2,5);
+INSERT INTO `comentarios` VALUES (1,'Que gran película, pero muy triste','2020-03-22 09:54:21',1,1),(2,'Que triste, no me ha gustado. Con Chaplin me esperaba reir mucho','2019-06-11 22:45:21',1,2),(3,'Que lenta la película, por favor. He visto westerns mucho mejores','2021-02-14 11:30:02',3,3),(4,'Que pedazo de canción, y como engancha. Cada día la escucho','2021-02-14 11:30:02',2,5);
 /*!40000 ALTER TABLE `comentarios` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -87,10 +85,7 @@ DROP TABLE IF EXISTS `etiquetas`;
 CREATE TABLE `etiquetas` (
   `etiqueta_id` int NOT NULL AUTO_INCREMENT,
   `nombre` varchar(45) NOT NULL,
-  `video_id` int NOT NULL,
-  PRIMARY KEY (`etiqueta_id`),
-  KEY `fk_etiquetas_videos1_idx` (`video_id`),
-  CONSTRAINT `fk_etiquetas_videos1` FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+  PRIMARY KEY (`etiqueta_id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -100,7 +95,7 @@ CREATE TABLE `etiquetas` (
 
 LOCK TABLES `etiquetas` WRITE;
 /*!40000 ALTER TABLE `etiquetas` DISABLE KEYS */;
-INSERT INTO `etiquetas` VALUES (1,'cine clásico',1),(2,'Dancing in the dark',2),(3,'Born to run',2),(4,'Hungry Heart',2),(5,'John Ford\'s Classics',3);
+INSERT INTO `etiquetas` VALUES (1,'cine clásico'),(2,'Dancing in the dark'),(3,'Born to run'),(4,'Hungry Heart'),(5,'John Ford\'s Classics');
 /*!40000 ALTER TABLE `etiquetas` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -165,6 +160,36 @@ INSERT INTO `playlists` VALUES (1,'Clásicos del cine','2019-09-12','PU',1),(2,'
 UNLOCK TABLES;
 
 --
+-- Table structure for table `reccciones`
+--
+
+DROP TABLE IF EXISTS `reccciones`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `reccciones` (
+  `usuario_id` int NOT NULL,
+  `comentario_id` int NOT NULL,
+  `fecha` date NOT NULL,
+  `like-dislike` enum('L','D') NOT NULL,
+  PRIMARY KEY (`usuario_id`,`comentario_id`),
+  KEY `fk_usuarios_has_comentarios_comentarios1_idx` (`comentario_id`),
+  KEY `fk_usuarios_has_comentarios_usuarios1_idx` (`usuario_id`),
+  CONSTRAINT `fk_usuarios_has_comentarios_comentarios1` FOREIGN KEY (`comentario_id`) REFERENCES `comentarios` (`comentario_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_usuarios_has_comentarios_usuarios1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`usuario_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `reccciones`
+--
+
+LOCK TABLES `reccciones` WRITE;
+/*!40000 ALTER TABLE `reccciones` DISABLE KEYS */;
+INSERT INTO `reccciones` VALUES (1,2,'2020-11-30','L'),(1,3,'2021-02-12','L'),(2,1,'2021-02-01','L'),(3,1,'2021-02-03','D');
+/*!40000 ALTER TABLE `reccciones` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `suscripciones`
 --
 
@@ -172,12 +197,14 @@ DROP TABLE IF EXISTS `suscripciones`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!50503 SET character_set_client = utf8mb4 */;
 CREATE TABLE `suscripciones` (
-  `suscripcion_id` int NOT NULL AUTO_INCREMENT,
   `canal_id` int NOT NULL,
-  PRIMARY KEY (`suscripcion_id`),
-  KEY `fk_suscripciones_canales1_idx` (`canal_id`),
-  CONSTRAINT `fk_suscripciones_canales1` FOREIGN KEY (`canal_id`) REFERENCES `canales` (`canal_id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+  `usuario_id` int NOT NULL,
+  PRIMARY KEY (`canal_id`,`usuario_id`),
+  KEY `fk_canales_has_usuarios_usuarios1_idx` (`usuario_id`),
+  KEY `fk_canales_has_usuarios_canales1_idx` (`canal_id`),
+  CONSTRAINT `fk_canales_has_usuarios_canales1` FOREIGN KEY (`canal_id`) REFERENCES `canales` (`canal_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_canales_has_usuarios_usuarios1` FOREIGN KEY (`usuario_id`) REFERENCES `usuarios` (`usuario_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -186,7 +213,7 @@ CREATE TABLE `suscripciones` (
 
 LOCK TABLES `suscripciones` WRITE;
 /*!40000 ALTER TABLE `suscripciones` DISABLE KEYS */;
-INSERT INTO `suscripciones` VALUES (1,1),(2,1),(3,1),(4,2);
+INSERT INTO `suscripciones` VALUES (1,1),(2,2),(1,3),(1,4),(2,5);
 /*!40000 ALTER TABLE `suscripciones` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -255,6 +282,62 @@ LOCK TABLES `videos` WRITE;
 INSERT INTO `videos` VALUES (1,'The Kid','película de Charles Chaplin','20MB','hgjhghjg','81','ghghg',190,'PU','2018-01-01','16:32:00',1),(2,'Greatest Hits Bruce Springsteen','De todos sus discos hasta Magic','5MB','hghjg','678','hggffd',56,'PR','2019-02-20','19:54:00',2),(3,'The Searchers','El mejor western de John Ford','34MB','hg','117','jurddsa',198765,'PU','2014-03-22','10:23:00',1),(4,'The Shining','Un Kubrick imprescindible y un terror inolvidable','39MB','astum','131','jhkjhkhj',1876543,'PU','2012-12-20','23:43:00',1);
 /*!40000 ALTER TABLE `videos` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `videos_has_etiquetas`
+--
+
+DROP TABLE IF EXISTS `videos_has_etiquetas`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `videos_has_etiquetas` (
+  `video_id` int NOT NULL,
+  `etiqueta_id` int NOT NULL,
+  PRIMARY KEY (`video_id`,`etiqueta_id`),
+  KEY `fk_videos_has_etiquetas_etiquetas1_idx` (`etiqueta_id`),
+  KEY `fk_videos_has_etiquetas_videos1_idx` (`video_id`),
+  CONSTRAINT `fk_videos_has_etiquetas_etiquetas1` FOREIGN KEY (`etiqueta_id`) REFERENCES `etiquetas` (`etiqueta_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_videos_has_etiquetas_videos1` FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `videos_has_etiquetas`
+--
+
+LOCK TABLES `videos_has_etiquetas` WRITE;
+/*!40000 ALTER TABLE `videos_has_etiquetas` DISABLE KEYS */;
+INSERT INTO `videos_has_etiquetas` VALUES (1,1),(2,2),(2,3),(2,4),(3,5);
+/*!40000 ALTER TABLE `videos_has_etiquetas` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `videos_has_playlists`
+--
+
+DROP TABLE IF EXISTS `videos_has_playlists`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `videos_has_playlists` (
+  `video_id` int NOT NULL,
+  `playlist_id` int NOT NULL,
+  PRIMARY KEY (`video_id`,`playlist_id`),
+  KEY `fk_videos_has_playlists_playlists1_idx` (`playlist_id`),
+  KEY `fk_videos_has_playlists_videos1_idx` (`video_id`),
+  CONSTRAINT `fk_videos_has_playlists_playlists1` FOREIGN KEY (`playlist_id`) REFERENCES `playlists` (`playlist_id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT `fk_videos_has_playlists_videos1` FOREIGN KEY (`video_id`) REFERENCES `videos` (`video_id`) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `videos_has_playlists`
+--
+
+LOCK TABLES `videos_has_playlists` WRITE;
+/*!40000 ALTER TABLE `videos_has_playlists` DISABLE KEYS */;
+INSERT INTO `videos_has_playlists` VALUES (1,1),(3,2),(4,3),(2,5);
+/*!40000 ALTER TABLE `videos_has_playlists` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -265,4 +348,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2021-02-14 11:30:46
+-- Dump completed on 2021-02-24 17:50:47
