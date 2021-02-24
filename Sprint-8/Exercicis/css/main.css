@@ -1,0 +1,70 @@
+body {
+    font-family: Verdana;
+    color: black;
+    padding: 30px;
+}
+
+.all-table {
+    border: 2px solid black; 
+}
+
+.columns {
+    border: 1px solid black;
+}
+
+th, td {
+    border: 1px solid black;
+    padding: 2px;        
+}
+
+.type-number {
+    text-align: right;
+}
+
+.total {
+    background-color: rgb(130, 219, 29);
+}
+
+.btn-new-product, .btn-update-product, .btn-delete-product {
+    width: 150px;
+    height: 40px;
+    border: 1px solid black;
+    border-radius: 5px;
+    background-color: aqua;
+    font-size: 20px;
+    padding: 15px 30px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+    margin-right: 10px;
+}
+
+input[type="text"] {
+    width: 300px;
+}
+input[type="number"] {
+    width: 160px;
+}
+
+input[type="submit"] {
+    text-align: center;
+    background-color: black;
+    color: white;
+    height: 38px;
+    width: 170px;
+    cursor: pointer;
+    border: none;
+    border-radius: 5px;
+    margin-top: 10px;
+}
+
+input[type="submit"]:hover {
+    background: #1bcc15;
+    color: black;
+}
+
+.icons-actions {
+    width: 30px;
+    height: 30px;
+    color: black;
+}
